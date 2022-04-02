@@ -1,0 +1,10 @@
+version: "3.8" ## especifica a versão do docker-compose file
+
+services: ## Define um serviço
+  app: ## nome do serviço
+    build: . ## localização do dockerfile
+    command: npm start ## comando a executar
+    ports:
+      - "5000:5000" ## redirecionamento de porta quando chegar alguma requisição na porta 5000 chama o container na porta 5000
+    volumes:
+      - .:/app ## monitoro a pasta atual . e envio as alterações para /app
