@@ -7,7 +7,7 @@ module.exports = {
             SELECT *
             FROM titles
 			JOIN ratings ON ratings.tconst = titles.tconst
-			ORDER BY titles.tconst DESC
+			ORDER BY titles.tconst
             `,
 			function (err, results) {
 				if (err) throw `Database error! ${err}`
@@ -46,16 +46,16 @@ module.exports = {
 		db.query(query, values, function (err, results) {
 			if (err) throw `Database error! ${err}`
 
-			callback()
+			callback(results.rows[0].tconst)
 		})
 	},
 	
 	find(filter, callback) {
 		db.query(
 			`
-            SELECT *
+            SELECT titles.*, ratings.averageRating, ratings.numVotes
             FROM titles
-			JOIN ratings ON ratings.tconst = titles.tconst
+			LEFT JOIN ratings ON ratings.tconst = titles.tconst
             WHERE titles.tconst ILIKE '%${filter}%'
 			OR titles.primarytitle ILIKE '%${filter}%'
 			OR titles.originaltitle ILIKE '%${filter}%'
@@ -74,9 +74,9 @@ module.exports = {
 	findId(id, callback) {
 		db.query(
 			`
-            SELECT *
+            SELECT titles.*, ratings.averageRating, ratings.numVotes
             FROM titles
-			JOIN ratings ON ratings.tconst = titles.tconst
+			LEFT JOIN ratings ON ratings.tconst = titles.tconst
             WHERE titles.tconst = $1`,
 			[id],
 			function (err, results) {

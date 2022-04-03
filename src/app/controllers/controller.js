@@ -1,5 +1,4 @@
-const Titles = require('../models/titles_model.js')
-const Ratings = require('../models/ratings_model.js')
+const Titles = require('../models/model.js')
 
 module.exports = {
 	index(req, res) {
@@ -8,13 +7,11 @@ module.exports = {
 		})
 	},
 	post(req, res) {
-		if (Object.keys(req.body).length === 0) {
-			return res.status(400).send('Please fill the body!')
-		}
+		if (Object.keys(req.body).length < 8) return res.status(400).send('Please fill the body!')
 
-		Titles.create(req.body, function () {
-			Ratings.create(req.body, function () {
-				return res.redirect('/')
+		Titles.create(req.body, function (id) {
+			Titles.findId(id, function (movie) {
+				return res.json(movie)
 			})
 		})
 	},
@@ -26,12 +23,13 @@ module.exports = {
 		})
 	},
 	put(req, res) {
-		if (Object.keys(req.body).length === 0) {
-			return res.status(400).send('Please fill the body!')
-		}
+		Titles.findId(req.params.id, function (found) {
+			if (!found) return res.send('ID not found!')
 
-		Titles.update(req.body, req.params.id, function () {
-			Ratings.update(req.body, req.params.id, function () {
+			if (Object.keys(req.body).length < 8)
+				return res.status(400).send('Please fill the body!')
+
+			Titles.update(req.body, req.params.id, function () {
 				Titles.findId(req.params.id, function (movie) {
 					return res.json(movie)
 				})
@@ -39,9 +37,13 @@ module.exports = {
 		})
 	},
 	delete(req, res) {
-		Titles.delete(req.params.id, function () {
-			Titles.all(titles => {
-				return res.json(titles)
+		Titles.findId(req.params.id, function (found) {
+			if (!found) return res.send('ID not found!')
+
+			Titles.delete(req.params.id, function () {
+				Titles.all(titles => {
+					return res.json(titles)
+				})
 			})
 		})
 	},
